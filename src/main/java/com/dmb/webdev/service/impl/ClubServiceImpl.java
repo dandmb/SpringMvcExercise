@@ -4,6 +4,7 @@ import com.dmb.webdev.dto.ClubDto;
 import com.dmb.webdev.models.Club;
 import com.dmb.webdev.repository.ClubRepository;
 import com.dmb.webdev.service.ClubService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,8 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public Club saveClub(Club club) {
+    public Club saveClub(ClubDto clubDto) {
+        Club club=mapToClub(clubDto);
         return clubRepository.save(club);
     }
 
@@ -39,6 +41,11 @@ public class ClubServiceImpl implements ClubService {
     public void updateClub(ClubDto clubDto) {
         Club club=mapToClub(clubDto);
         clubRepository.save(club);
+    }
+
+    @Override
+    public void delete(Long clubId) {
+        clubRepository.deleteById(clubId);
     }
 
     private Club mapToClub(ClubDto club) {

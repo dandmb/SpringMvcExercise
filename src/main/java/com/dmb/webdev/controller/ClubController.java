@@ -3,10 +3,12 @@ package com.dmb.webdev.controller;
 import com.dmb.webdev.dto.ClubDto;
 import com.dmb.webdev.models.Club;
 import com.dmb.webdev.service.ClubService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,8 +38,12 @@ public class ClubController {
         return "clubs-create";
     }
     @PostMapping("/clubs/new")
-    public String saveClub(@ModelAttribute("club") Club club){
-        clubService.saveClub(club);
+    public String saveClub(@Valid @ModelAttribute("club") ClubDto clubDto, BindingResult result,Model model){
+        clubService.saveClub(clubDto);
+        if(result.hasErrors()) {
+            model.addAttribute("club", clubDto);
+            return "clubs-create";
+        }
 
         return "redirect:/clubs";
     }
@@ -48,9 +54,36 @@ public class ClubController {
         return "clubs-edit";
     }
     @PostMapping("/clubs/{clubId}/edit")
-    public String updateClub(@PathVariable("clubId") Long clubId, @ModelAttribute("club") ClubDto club){
+    public String updateClub(@PathVariable("clubId") Long clubId,
+                             @Valid @ModelAttribute("club") ClubDto club,
+                             BindingResult result, Model model){
+        if(result.hasErrors()) {
+            model.addAttribute("club", club);
+            return "clubs-edit";
+        }
         club.setId(clubId);
         clubService.updateClub(club);
+        return "redirect:/clubs";
+    }
+
+    @GetMapping("/clubs/{clubId}")
+    public String clubDetail(@PathVariable("clubId") long clubId, Model model) {
+        //UserEntity user = new UserEntity();
+        ClubDto clubDto = clubService.findClubById(clubId);
+        //String username = SecurityUtil.getSessionUser();
+        /*
+        if(username != null) {
+            user = userService.findByUsername(username);
+            model.addAttribute("user", user);
+        }*/
+        //model.addAttribute("user", user);
+        model.addAttribute("club", clubDto);
+        return "clubs-detail";
+    }
+
+    @GetMapping("/clubs/{clubId}/delete")
+    public String deleteClub(@PathVariable("clubId")Long clubId) {
+        clubService.delete(clubId);
         return "redirect:/clubs";
     }
 
